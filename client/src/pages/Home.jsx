@@ -1,134 +1,133 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
-import SwiperCore from 'swiper';
-import 'swiper/css/bundle';
-import ListingItem from '../components/ListingItem';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaSearch } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
+import PostCard from './Services';
+import PropertyCard from './PostCard';
+import Footer from './Footer';
+
+const servicesData = [
+  {
+    imageUrl: "/house.png",
+    title: "Buy a Home",
+    description: "Explore this stunning villa offering breathtaking ocean views and modern amenities.Explore this stunning villa offering breathtaking ocean views and modern amenities.",
+  },
+  {
+    imageUrl: "/vila1.jpg",
+    title: "Rent a Home",
+    description: "Explore this stunning villa offering breathtaking ocean views and modern amenities.Explore this stunning villa offering breathtaking ocean views and modern amenities.",
+  },
+  {
+    imageUrl: "/vila1.jpg",
+    title: "Sell a Home",
+    description: "Explore this stunning villa offering breathtaking ocean views and modern amenities.Explore this stunning villa offering breathtaking ocean views and modern amenities.",
+  },
+];
 
 export default function Home() {
-  const [offerListings, setOfferListings] = useState([]);
-  const [saleListings, setSaleListings] = useState([]);
-  const [rentListings, setRentListings] = useState([]);
-  SwiperCore.use([Navigation]);
-  console.log(offerListings);
+  const { currentUser } = useSelector((state) => state.user);
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('searchTerm', searchTerm);
+    const searchQuery = urlParams.toString();
+    navigate(`/search?${searchQuery}`);
+  };
+  
   useEffect(() => {
-    const fetchOfferListings = async () => {
-      try {
-        const res = await fetch('/api/listing/get?offer=true&limit=4');
-        const data = await res.json();
-        setOfferListings(data);
-        fetchRentListings();
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    const fetchRentListings = async () => {
-      try {
-        const res = await fetch('/api/listing/get?type=rent&limit=4');
-        const data = await res.json();
-        setRentListings(data);
-        fetchSaleListings();
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    const fetchSaleListings = async () => {
-      try {
-        const res = await fetch('/api/listing/get?type=sale&limit=4');
-        const data = await res.json();
-        setSaleListings(data);
-      } catch (error) {
-        log(error);
-      }
-    };
-    fetchOfferListings();
-  }, []);
+    const urlParams = new URLSearchParams(location.search);
+    const searchTermFromUrl = urlParams.get('searchTerm');
+    if (searchTermFromUrl) {
+      setSearchTerm(searchTermFromUrl);
+    }
+  }, [location.search]);
+  
   return (
-    <div>
-      {/* top */}
-      <div className='flex flex-col gap-6 p-28 px-3 max-w-6xl mx-auto'>
-        <h1 className='text-slate-700 font-bold text-3xl lg:text-6xl'>
-          Find your next <span className='text-slate-500'>perfect</span>
-          <br />
-          place with ease
-        </h1>
-        <div className='text-gray-400 text-xs sm:text-sm'>
-          Sahand Estate is the best place to find your next perfect place to
-          live.
-          <br />
-          We have a wide range of properties for you to choose from.
+    <div className='absolute inset-0 bg-gradient-to-b from-gray-900 to-black opacity-92'>
+      <div className="bg-cover bg-center bg-no-repeat mt-0 h-screen flex justify-center items-center text-white" style={{ backgroundImage: 'url("/vila1.jpg")' }}>
+        <div className="flex flex-col justify-center items-center max-w-screen-lg mx-auto px-4">
+          <div className='w-full shadow-2xl md:w-[335px] mt-[450px]'>
+            <form
+              onSubmit={handleSubmit}
+              className='bg-white text-black p-3 rounded-3xl flex items-center w-full shadow-lg'
+            >
+              <input
+                type='text'
+                placeholder='Search...'
+                className='bg-transparent focus:outline-none w-full sm:w-64 mr-2 ml-2'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className='bg-blue-500 focus:outline-none focus:shadow-outline text-white py-2 px-4 rounded-2xl hover:bg-blue-700 shadow-md'>
+                <FaSearch />
+              </button>
+            </form>
+          </div>
         </div>
-        <Link
-          to={'/search'}
-          className='text-xs sm:text-sm text-blue-800 font-bold hover:underline'
-        >
-          Let's get started...
-        </Link>
       </div>
-
-      {/* swiper */}
-      <Swiper navigation>
-        {offerListings &&
-          offerListings.length > 0 &&
-          offerListings.map((listing) => (
-            <SwiperSlide>
-              <div
-                style={{
-                  background: `url(${listing.imageUrls[0]}) center no-repeat`,
-                  backgroundSize: 'cover',
-                }}
-                className='h-[500px]'
-                key={listing._id}
-              ></div>
-            </SwiperSlide>
+      <div className=' mt-[80px] flex flex-col'>
+        <div className='flex flex-row justify-center '>
+          <div className="text-center py-[8px] rounded-2xl px-[7px] bg-slate-500 border w-40 border-[#7042f88b] opacity-[0.9]]">
+            <h1 className="text-[18px]">Our Services</h1>
+          </div>
+        </div>
+        <div className='mt-10 flex justify-center space-x-4'>
+          {servicesData.map((service, index) => (
+            <PostCard
+              key={index}
+              imageUrl={service.imageUrl}
+              title={service.title}
+              description={service.description}
+            />
           ))}
-      </Swiper>
-
-      {/* listing results for offer, sale and rent */}
-
-      <div className='max-w-6xl mx-auto p-3 flex flex-col gap-8 my-10'>
-        {offerListings && offerListings.length > 0 && (
-          <div className=''>
-            <div className='my-3'>
-              <h2 className='text-2xl font-semibold text-slate-600'>Recent offers</h2>
-              <Link className='text-sm text-blue-800 hover:underline' to={'/search?offer=true'}>Show more offers</Link>
-            </div>
-            <div className='flex flex-wrap gap-4'>
-              {offerListings.map((listing) => (
-                <ListingItem listing={listing} key={listing._id} />
-              ))}
-            </div>
-          </div>
-        )}
-        {rentListings && rentListings.length > 0 && (
-          <div className=''>
-            <div className='my-3'>
-              <h2 className='text-2xl font-semibold text-slate-600'>Recent places for rent</h2>
-              <Link className='text-sm text-blue-800 hover:underline' to={'/search?type=rent'}>Show more places for rent</Link>
-            </div>
-            <div className='flex flex-wrap gap-4'>
-              {rentListings.map((listing) => (
-                <ListingItem listing={listing} key={listing._id} />
-              ))}
-            </div>
-          </div>
-        )}
-        {saleListings && saleListings.length > 0 && (
-          <div className=''>
-            <div className='my-3'>
-              <h2 className='text-2xl font-semibold text-slate-600'>Recent places for sale</h2>
-              <Link className='text-sm text-blue-800 hover:underline' to={'/search?type=sale'}>Show more places for sale</Link>
-            </div>
-            <div className='flex flex-wrap gap-4'>
-              {saleListings.map((listing) => (
-                <ListingItem listing={listing} key={listing._id} />
-              ))}
-            </div>
-          </div>
-        )}
+        </div>
+        
       </div>
+      <div className=' mt-[80px] flex flex-col justify-center'>
+        <div className='flex flex-row justify-center '>
+          <div className="text-center py-[8px] rounded-2xl px-[7px] bg-slate-500 border w-40 border-[#7042f88b] opacity-[0.9]]">
+            <h1 className="text-[18px]">Properties</h1>
+          </div>
+        </div>
+            <h1 className='mt-3 text-center text-[28px]'>Featured Listings</h1>
+        <div className='mt-10 flex justify-center space-x-4'>
+          
+            <PropertyCard
+              imageUrl={servicesData[0].imageUrl}
+              name="Royal XYZ"
+              price='10000000'
+              description={servicesData[0].description}
+              bedrooms={3}
+              bathrooms={2}
+              area={2000}
+
+            />
+            <PropertyCard
+              imageUrl={servicesData[0].imageUrl}
+              name="ABC Mansion"
+              price='10000000'
+              description={servicesData[0].description}
+              bedrooms={3}
+              bathrooms={2}
+              area={2000}
+
+            />
+            <PropertyCard
+              imageUrl={servicesData[0].imageUrl}
+              name="Topaz Villa"
+              price='10000000'
+              description={servicesData[0].description}
+              bedrooms={3}
+              bathrooms={2}
+              area={2000}
+
+            />
+        </div>
+      </div>
+      <Footer />
     </div>
   );
 }
