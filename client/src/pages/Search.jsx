@@ -1,62 +1,65 @@
-import React from 'react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ListingItem from '../components/ListingItem';
+import { FaSearch } from 'react-icons/fa';
+import Range from '../components/Slider.jsx';
 
 export default function Search() {
-  const [showMore, setShowMore] = useState(false);
-    const navigate = useNavigate();
-  const [sidebardata, setSidebardata] = useState({
+  const [showMore, setShowMore]=useState(false);
+  const [countBedrooms, setCountBedrooms]=useState(0);
+  const [countBathrooms, setCountBathrooms]=useState(0);
+  const navigate=useNavigate();
+  const [sidebardata, setSidebardata]=useState({
     searchTerm: '',
     type: 'all',
-    parking: false,
+    parking: true,
     furnished: false,
     offer: false,
     sort: 'created_at',
     order: 'desc',
   });
-
-  const [loading, setLoading] = useState(false);
-  const [listings, setListings] = useState([]);
+  
+  const [loading, setLoading]=useState(false);
+  const [listings, setListings]=useState([]);
   console.log(listings);
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get('searchTerm');
-    const typeFromUrl = urlParams.get('type');
-    const parkingFromUrl = urlParams.get('parking');
-    const furnishedFromUrl = urlParams.get('furnished');
-    const offerFromUrl = urlParams.get('offer');
-    const sortFromUrl = urlParams.get('sort');
-    const orderFromUrl = urlParams.get('order');
+    const urlParams=new URLSearchParams(location.search);
+    const searchTermFromUrl=urlParams.get('searchTerm');
+    const typeFromUrl=urlParams.get('type');
+    const parkingFromUrl=urlParams.get('parking');
+    const furnishedFromUrl=urlParams.get('furnished');
+    const offerFromUrl=urlParams.get('offer');
+    const sortFromUrl=urlParams.get('sort');
+    const orderFromUrl=urlParams.get('order');
 
     if (
-      searchTermFromUrl ||
-      typeFromUrl ||
-      parkingFromUrl ||
-      furnishedFromUrl ||
-      offerFromUrl ||
-      sortFromUrl ||
+      searchTermFromUrl||
+      typeFromUrl||
+      parkingFromUrl||
+      furnishedFromUrl||
+      offerFromUrl||
+      sortFromUrl||
       orderFromUrl
     ) {
       setSidebardata({
-        searchTerm: searchTermFromUrl || '',
-        type: typeFromUrl || 'all',
-        parking: parkingFromUrl === 'true' ? true : false,
-        furnished: furnishedFromUrl === 'true' ? true : false,
-        offer: offerFromUrl === 'true' ? true : false,
-        sort: sortFromUrl || 'created_at',
-        order: orderFromUrl || 'desc',
+        searchTerm: searchTermFromUrl||'',
+        type: typeFromUrl||'all',
+        parking: parkingFromUrl==='true'? true:false,
+        furnished: furnishedFromUrl==='true'? true:false,
+        offer: offerFromUrl==='true'? true:false,
+        sort: sortFromUrl||'created_at',
+        order: orderFromUrl||'desc',
       });
     }
 
-    const fetchListings = async () => {
+    const fetchListings=async () => {
       setLoading(true);
       setShowMore(false);
-      const searchQuery = urlParams.toString();
-      const res = await fetch(`/api/listing/get?${searchQuery}`);
-      const data = await res.json();
-      if (data.length > 8) {
+      const searchQuery=urlParams.toString();
+      const res=await fetch(`/api/listing/get?${searchQuery}`);
+      const data=await res.json();
+      if (data.length>8) {
         setShowMore(true);
       } else {
         setShowMore(false);
@@ -68,43 +71,58 @@ export default function Search() {
     fetchListings();
   }, [location.search]);
 
-  const handleChange = (e) => {
+  const handleChange=(e) => {
     if (
-      e.target.id === 'all' ||
-      e.target.id === 'rent' ||
-      e.target.id === 'sale'
+      e.target.id==='all'||
+      e.target.id==='rent'||
+      e.target.id==='sale'
     ) {
       setSidebardata({ ...sidebardata, type: e.target.id });
     }
 
-    if (e.target.id === 'searchTerm') {
+    if (e.target.id==='searchTerm') {
       setSidebardata({ ...sidebardata, searchTerm: e.target.value });
     }
 
     if (
-      e.target.id === 'parking' ||
-      e.target.id === 'furnished' ||
-      e.target.id === 'offer'
+      e.target.id==='parking'||
+      e.target.id==='furnished'||
+      e.target.id==='offer'
     ) {
       setSidebardata({
         ...sidebardata,
         [e.target.id]:
-          e.target.checked || e.target.checked === 'true' ? true : false,
+          e.target.checked||e.target.checked==='true'? true:false,
       });
     }
 
-    if (e.target.id === 'sort_order') {
-      const sort = e.target.value.split('_')[0] || 'created_at';
+    if (e.target.id==='sort_order') {
+      const sort=e.target.value.split('_')[0]||'created_at';
 
-      const order = e.target.value.split('_')[1] || 'desc';
+      const order=e.target.value.split('_')[1]||'desc';
 
       setSidebardata({ ...sidebardata, sort, order });
     }
   };
+  const handleIncrement=(counterSetter) => {
+    counterSetter((prevCount) => prevCount+1);
+  };
 
-  const handleSubmit = (e) => {
+  const handleDecrement=(counterSetter) => {
+    counterSetter((prevCount) => (prevCount>0? prevCount-1:0));
+  };
+  const [searchTerm, setSearchTerm]=useState('');
+  useEffect(() => {
+    const urlParams=new URLSearchParams(location.search);
+    const searchTermFromUrl=urlParams.get('searchTerm');
+    if (searchTermFromUrl) {
+      setSearchTerm(searchTermFromUrl);
+    }
+  }, [location.search]);
+
+  const handleSubmit=(e) => {
     e.preventDefault();
-    const urlParams = new URLSearchParams();
+    const urlParams=new URLSearchParams();
     urlParams.set('searchTerm', sidebardata.searchTerm);
     urlParams.set('type', sidebardata.type);
     urlParams.set('parking', sidebardata.parking);
@@ -112,73 +130,78 @@ export default function Search() {
     urlParams.set('offer', sidebardata.offer);
     urlParams.set('sort', sidebardata.sort);
     urlParams.set('order', sidebardata.order);
-    const searchQuery = urlParams.toString();
+    const searchQuery=urlParams.toString();
     navigate(`/search?${searchQuery}`);
   };
-  const onShowMoreClick = async () => {
-    const numberOfListings = listings.length;
-    const startIndex = numberOfListings;
-    const urlParams = new URLSearchParams(location.search);
+  const onShowMoreClick=async () => {
+    const numberOfListings=listings.length;
+    const startIndex=numberOfListings;
+    const urlParams=new URLSearchParams(location.search);
     urlParams.set('startIndex', startIndex);
-    const searchQuery = urlParams.toString();
-    const res = await fetch(`/api/listing/get?${searchQuery}`);
-    const data = await res.json();
-    if (data.length < 9) {
+    const searchQuery=urlParams.toString();
+    const res=await fetch(`/api/listing/get?${searchQuery}`);
+    const data=await res.json();
+    if (data.length<9) {
       setShowMore(false);
     }
     setListings([...listings, ...data]);
+
   };
   return (
-    <div className='flex flex-col md:flex-row'>
-      <div className='p-7  border-b-2 md:border-r-2 md:min-h-screen'>
+    <div className='flex flex-col pt-[65px] pb-[90px] md:flex-row'>
+      <div className='p-7 h-full border-b-2 bg-slate-400 md:border-r-2 md:min-h-screen'>
         <form onSubmit={handleSubmit} className='flex flex-col gap-8'>
-          <div className='flex items-center gap-2'>
-          <label className='whitespace-nowrap font-semibold'>
-              Search Term:
-            </label>
-            <input
-              type='text'
-              id='searchTerm'
-              placeholder='Search...'
-              className='border rounded-lg p-3 w-full'
-              value={sidebardata.searchTerm}
-              onChange={handleChange}
-            />
+          <div className='w-full md:w-[335px]'>
+            <form
+              onSubmit={handleSubmit}
+              className='bg-gray-800 text-white p-3 rounded-3xl flex items-center w-full shadow-lg'
+            >
+              <input
+                type='text'
+                placeholder='Search...'
+                className='bg-transparent focus:outline-none w-full sm:w-64 mr-2 ml-2'
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className='bg-blue-500 focus:outline-none focus:shadow-outline text-white py-2 px-4 rounded-2xl hover:bg-blue-700 shadow-md'>
+                <FaSearch />
+              </button>
+            </form>
           </div>
           <div className='flex gap-2 flex-wrap items-center'>
             <label className='font-semibold'>Type:</label>
             <div className='flex gap-2'>
-            <input
+              <input
                 type='checkbox'
                 id='all'
                 className='w-5'
                 onChange={handleChange}
-                checked={sidebardata.type === 'all'}
+                checked={sidebardata.type==='all'}
               />
               <span>Rent & Sale</span>
             </div>
             <div className='flex gap-2'>
-            <input
+              <input
                 type='checkbox'
                 id='rent'
                 className='w-5'
                 onChange={handleChange}
-                checked={sidebardata.type === 'rent'}
+                checked={sidebardata.type==='rent'}
               />
               <span>Rent</span>
             </div>
             <div className='flex gap-2'>
-            <input
+              <input
                 type='checkbox'
                 id='sale'
                 className='w-5'
                 onChange={handleChange}
-                checked={sidebardata.type === 'sale'}
+                checked={sidebardata.type==='sale'}
               />
               <span>Sale</span>
             </div>
             <div className='flex gap-2'>
-            <input
+              <input
                 type='checkbox'
                 id='offer'
                 className='w-5'
@@ -191,7 +214,7 @@ export default function Search() {
           <div className='flex gap-2 flex-wrap items-center'>
             <label className='font-semibold'>Amenities:</label>
             <div className='flex gap-2'>
-            <input
+              <input
                 type='checkbox'
                 id='parking'
                 className='w-5'
@@ -201,7 +224,7 @@ export default function Search() {
               <span>Parking</span>
             </div>
             <div className='flex gap-2'>
-            <input
+              <input
                 type='checkbox'
                 id='furnished'
                 className='w-5'
@@ -225,31 +248,84 @@ export default function Search() {
               <option value='createdAt_asc'>Oldest</option>
             </select>
           </div>
+          <div className='flex gap-2'>
+            <label className='font-semibold'>Bedroom:</label>
+            <div className="flex items-center justify-center overflow-hidden">
+              <button
+                onClick={() => handleDecrement(setCountBedrooms)}
+                className="w-5 h-5 bg-slate-600 text-white font-bold rounded-l-full flex justify-center items-center focus:outline-none focus:shadow-outline"
+              >
+                -
+              </button>
+              <input
+                className="w-10 h-5 text-center border-none text-gray-700"
+                type="number"
+                value={countBedrooms}
+                onChange={(e) => setCountBedrooms(Number(e.target.value))}
+              />
+              <button
+                onClick={() => handleIncrement(setCountBedrooms)}
+                className="w-5 h-5 bg-slate-600 text-white font-bold rounded-r-full flex justify-center items-center focus:outline-none focus:shadow-outline"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className='flex gap-2'>
+            <label className='font-semibold'>Bathroom:</label>
+            <div className="flex items-center justify-center overflow-hidden">
+              <button
+                onClick={() => handleDecrement(setCountBathrooms)}
+                className="w-5 h-5 bg-slate-600 text-white font-bold rounded-l-full flex justify-center items-center focus:outline-none focus:shadow-outline"
+              >
+                -
+              </button>
+              <input
+                className="w-10 h-5 text-center border-none text-gray-700"
+                type="number"
+                value={countBathrooms}
+                onChange={(e) => setCountBathrooms(Number(e.target.value))}
+              />
+              <button
+                onClick={() => handleIncrement(setCountBathrooms)}
+                className="w-5 h-5 bg-slate-600 text-white font-bold rounded-r-full flex justify-center items-center focus:outline-none focus:shadow-outline"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className='flex flex-col'>
+          <label className='font-semibold'>Price Range (in Million $):</label>
+          
+          <div>
+            <Range/>
+          </div>
+          </div>
           <button className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95'>
             Search
           </button>
         </form>
       </div>
       <div className='flex-1'>
-      <h1 className='text-3xl font-semibold border-b p-3 text-slate-700 mt-5'>
+        <h1 className='text-3xl font-semibold border-b p-3 text-slate-700 mt-5'>
           Listing results:
         </h1>
         <div className='p-7 flex flex-wrap gap-4'>
-          {!loading && listings.length === 0 && (
+          {!loading&&listings.length===0&&(
             <p className='text-xl text-slate-700'>No listing found!</p>
           )}
-          {loading && (
+          {loading&&(
             <p className='text-xl text-slate-700 text-center w-full'>
               Loading...
             </p>
           )}
 
-          {!loading &&
-            listings &&
+          {!loading&&
+            listings&&
             listings.map((listing) => (
               <ListingItem key={listing._id} listing={listing} />
             ))}
-            {showMore && (
+          {showMore&&(
             <button
               onClick={onShowMoreClick}
               className='text-green-700 hover:underline p-7 text-center w-full'
